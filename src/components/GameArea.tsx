@@ -25,7 +25,7 @@ const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange
     <Card className="w-full flex flex-col gap-4">
       <CardHeader>
         <CardTitle className="text-center font-black uppercase text-[48px]">PISCA</CardTitle>
-        {/* Debug: show current target word */}
+        {/* @ts-ignore Debug: show current target word */}
        {import.meta.env.DEV && <div className="text-center text-sm text-gray-500 mt-1">Target: {chosenWord.toUpperCase()}</div>}
       </CardHeader>
 
