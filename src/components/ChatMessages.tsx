@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { ChatMessage } from '@/types/chat'
 
 interface ChatMessageItemProps {
@@ -60,32 +61,76 @@ interface ChatMessagesListProps {
 }
 
 export function ChatMessagesList({ messages, scrollContainerRef }: ChatMessagesListProps) {
+  const internalScrollRef = useRef<HTMLDivElement | null>(null)
+  const parentRef = useMemo(() => scrollContainerRef ?? internalScrollRef, [scrollContainerRef])
+
+  const atBottomRef = useRef<boolean>(true)
+
   useEffect(() => {
-    // Auto-scroll to bottom when new messages arrive
-    // Only scroll within the scroll container, not the whole page
-    if (scrollContainerRef?.current) {
-      const container = scrollContainerRef.current
-      // Scroll to bottom of the container with smooth behavior
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: 'smooth'
-      })
+    const el = parentRef.current
+    if (!el) return
+
+    const handleScroll = () => {
+      const threshold = 48 // px tolerance to still consider at bottom
+      atBottomRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - threshold
     }
-  }, [messages, scrollContainerRef])
+
+    // Initialize state and listen to scroll updates
+    handleScroll()
+    el.addEventListener('scroll', handleScroll, { passive: true })
+    return () => el.removeEventListener('scroll', handleScroll)
+  }, [parentRef])
+
+  const rowVirtualizer = useVirtualizer({
+    count: messages.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 56,
+    overscan: 12,
+    // Let the virtualizer measure dynamic item heights for accuracy
+    measureElement: (el) => el?.getBoundingClientRect().height ?? 56,
+  })
+
+  // Stick to bottom when new messages arrive if user was already at bottom
+  useEffect(() => {
+    if (messages.length === 0) return
+    if (!parentRef.current) return
+    if (!atBottomRef.current) return
+    rowVirtualizer.scrollToIndex(messages.length - 1, { align: 'end' })
+  }, [messages, parentRef, rowVirtualizer])
+
+  if (messages.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground p-4">
+        <p>Nenhuma mensagem ainda. As mensagens do chat aparecerão aqui.</p>
+      </div>
+    )
+  }
+
+  const virtualItems = rowVirtualizer.getVirtualItems()
 
   return (
-    <div className="flex flex-col">
-      {messages.length === 0 ? (
-        <div className="flex items-center justify-center h-full text-muted-foreground p-4">
-          <p>Nenhuma mensagem ainda. As mensagens do chat aparecerão aqui.</p>
-        </div>
-      ) : (
-        <>
-          {messages.map((message) => (
-            <ChatMessageItem key={message.id} message={message} />
-          ))}
-        </>
-      )}
+    <div ref={!scrollContainerRef ? internalScrollRef : undefined} className="relative">
+      <div style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}>
+        {virtualItems.map((virtualRow) => {
+          const message = messages[virtualRow.index]
+          return (
+            <div
+              key={message.id}
+              ref={rowVirtualizer.measureElement as React.Ref<HTMLDivElement>}
+              data-index={virtualRow.index}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${virtualRow.start}px)`,
+              }}
+            >
+              <ChatMessageItem message={message} />
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

@@ -13,6 +13,7 @@
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@tanstack/react-query": "^5.17.0",
+    "@tanstack/react-virtual": "^3.13.12",
     "@types/papaparse": "^5.3.16",
     "@types/tmi.js": "^1.8.6",
     "class-variance-authority": "^0.7.0",

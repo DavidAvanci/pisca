@@ -112,8 +112,8 @@ function TwitchChatViewer() {
                 {messages.length} mensage{messages.length !== 1 ? 'ns' : 'm'}
               </CardDescription>
             </CardHeader>
-            <CardContent className='h-full'>
-              <ScrollArea ref={scrollAreaRef} className="h-full w-full squircle border">
+            <CardContent className='h-full overflow-y-auto'>
+              <ScrollArea ref={scrollAreaRef} className="h-full w-full squircle border scrollbar-thin">
                 <ChatMessagesList messages={messages} scrollContainerRef={scrollAreaRef} />
               </ScrollArea>
             </CardContent>

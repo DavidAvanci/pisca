@@ -70,6 +70,31 @@
       border-radius: 40px;
     }
   }
+  .scrollbar-thin {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: hsl(var(--muted-foreground) / 0.5) transparent; /* Firefox */
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px; /* Chrome/Safari/Edge */
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+    border-radius: 9999px;
+    border: 2px solid transparent; /* keeps track background invisible */
+    background-clip: content-box;
+  }
+  .scrollbar-thin::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none; /* Hide arrow buttons on WebKit */
+  }
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: transparent; /* no corner fill */
+  }
 }
 
 [data-sonner-toast][data-mounted=true] {
