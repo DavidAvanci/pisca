@@ -3,15 +3,18 @@ import { Card, CardHeader, CardTitle, CardContent } from "./ui/card"
 import { Input } from "./ui/input"
 import { useGameStore } from "@/components/stores/useGameStore"
 import { TRIES, WORD_LETTERS } from "@/lib/consts"
-import { Keyboard } from "./keyboard"
+import { Keyboard } from "./Keyboard"
 
 
 
 const LETTER_STATUS = ['gray', 'yellow', 'green']
 
 export const GameArea = () => {
-const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange, handleFocus, chosenWord } = useGameStore()
+const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange, handleFocus, chosenWord, wordsInThisSession } = useGameStore()
 
+  useEffect(() => {
+    console.log('wordsInThisSession', wordsInThisSession)
+  }, [wordsInThisSession])
 
   useEffect(() => {
     const input = document.getElementById(`${currentRow}-${currentCol}`) as HTMLInputElement
@@ -22,7 +25,7 @@ const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange
 
 
   return (
-    <Card className="w-full flex flex-col gap-4">
+    <Card className="w-full flex flex-col gap-4 items-center">
       <CardHeader>
         <CardTitle className="text-center font-black uppercase text-[48px]">PISCA</CardTitle>
         {/* @ts-ignore Debug: show current target word */}
@@ -31,8 +34,8 @@ const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange
 
       <CardContent>
         <div
-          className="grid gap-2 justify-center"
-          style={{ gridTemplateColumns: `repeat(${WORD_LETTERS}, 80px)` }}
+          className="grid gap-2 justify-center grid-cols-5 w-fit"
+          // style={{ gridTemplateColumns: `repeat(${WORD_LETTERS}, 80px)` }}
         >
           {Array.from({ length: TRIES }).map((_, rowIdx) =>
             Array.from({ length: WORD_LETTERS }).map((_, colIdx) => {
@@ -53,7 +56,7 @@ const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange
                 
                 return (
               <Input
-              className={`w-[80px] h-[80px] text-[40px] text-center font-black uppercase border-4`}
+              className={`md:h-[80px] md:w-[80px] w-[60px] h-[60px] aspect-square md:text-[40px] text-[30px] text-center font-black uppercase border-4`}
                 id={`${rowIdx}-${colIdx}`}
                 key={`${rowIdx}-${colIdx}`}
                 value={letter}

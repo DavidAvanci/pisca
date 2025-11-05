@@ -76,7 +76,7 @@ export const Keyboard = () => {
                 onClick={() => handleKeyClick(letter)}
                 disabled={isGameOver}
                 className={`
-                  w-10 h-12 text-base font-bold uppercase
+                  md:w-10 md:h-12 w-8 h-10 text-base font-bold uppercase
                   transition-all duration-200
                   ${hasStatus ? 'text-white hover:opacity-90' : ''}
                 `}

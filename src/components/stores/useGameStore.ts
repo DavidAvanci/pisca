@@ -1,6 +1,6 @@
 import {  TRIES, WIN_MESSAGES, WORD_LETTERS } from "@/lib/consts"
 import { create } from "zustand"
-import { validWords } from "../../lib/validWords_existing"
+import { validWords } from "../../lib/validWords"
 
 type GameState = {
     showMessages: boolean,
@@ -9,6 +9,8 @@ type GameState = {
     toggleEndGameOnCorrectTwitchMessage: () => void,
     chosenWord: string,
     guesses: (0 | 1 | 2)[][],
+    wordsInThisSession: string[],
+    setWordsInThisSession: (words: string[]) => void,
   letters: string[][],
   currentRow: number,
   currentCol: number,
@@ -26,6 +28,16 @@ import { immer } from "zustand/middleware/immer"
 import { customInfoToast, customLossToast, customToast, customWinToast, formatWord } from "@/lib/utils"
 import { toast } from "sonner"
 
+
+const getNewWord = (wordsInThisSession: string[]) => {
+  console.log('getting new word', wordsInThisSession)
+  const newWord = validWords[Math.floor(Math.random() * validWords.length)]
+  if(wordsInThisSession.includes(newWord)){
+    return getNewWord(wordsInThisSession)
+  }
+  return newWord
+}
+
 export const useGameStore = create<GameState>()(
   immer((set) => ({
     showMessages: true,
@@ -40,7 +52,11 @@ export const useGameStore = create<GameState>()(
     setWinners: (winners) => set((state) => {
       state.winners = winners
     }),
-    chosenWord: validWords[Math.floor(Math.random() * validWords.length)],
+    wordsInThisSession: [],
+    setWordsInThisSession: (words) => set((state) => {
+      state.wordsInThisSession = words
+    }),
+    chosenWord: getNewWord([]),
     guesses: Array.from({ length: TRIES }, () => Array.from({ length: WORD_LETTERS }, () => 0)),
     letters: Array.from({ length: TRIES }, () => Array.from({ length: WORD_LETTERS }, () => '')),
     currentRow: 0,
@@ -166,9 +182,11 @@ export const useGameStore = create<GameState>()(
         state.currentCol = colIdx
       }),
     resetGame: () =>
+
       set((state) => {
         toast.dismiss()
-        state.chosenWord = validWords[Math.floor(Math.random() * validWords.length)]
+        state.wordsInThisSession = [...state.wordsInThisSession, state.chosenWord]
+        state.chosenWord = getNewWord(state.wordsInThisSession)
         state.guesses = Array.from({ length: TRIES }, () => Array.from({ length: WORD_LETTERS }, () => 0))
         state.letters = Array.from({ length: TRIES }, () => Array.from({ length: WORD_LETTERS }, () => ''))
         state.currentRow = 0

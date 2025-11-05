@@ -44,8 +44,9 @@ function TwitchChatViewer() {
     }
   }
 
+
   return (
-    <div className="h-dvh bg-background p-4 md:p-8 flex gap-4 relative">
+    <div className="h-dvh w-dvw bg-background p-4 md:p-8 flex gap-4 relative flex-col md:flex-row overflow-y-auto overflow-x-hidden">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
         </div>
