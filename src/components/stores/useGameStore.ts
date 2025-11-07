@@ -1,13 +1,16 @@
 import {  TRIES, WIN_MESSAGES, WORD_LETTERS } from "@/lib/consts"
 import { create } from "zustand"
-import { validWords } from "../../lib/validWords"
+import { wordsWithDescriptions } from "../../lib/wordsWithDescriptions"
 
 type GameState = {
     showMessages: boolean,
     toggleMessages: () => void,
     endGameOnCorrectTwitchMessage: boolean,
     toggleEndGameOnCorrectTwitchMessage: () => void,
-    chosenWord: string,
+    chosenWord: {
+      text: string,
+      description: string
+    },
     guesses: (0 | 1 | 2)[][],
     wordsInThisSession: string[],
     setWordsInThisSession: (words: string[]) => void,
@@ -30,9 +33,8 @@ import { toast } from "sonner"
 
 
 const getNewWord = (wordsInThisSession: string[]) => {
-  console.log('getting new word', wordsInThisSession)
-  const newWord = validWords[Math.floor(Math.random() * validWords.length)]
-  if(wordsInThisSession.includes(newWord)){
+  const newWord = wordsWithDescriptions[Math.floor(Math.random() * wordsWithDescriptions.length)]
+  if(wordsInThisSession.includes(newWord.text)){
     return getNewWord(wordsInThisSession)
   }
   return newWord
@@ -64,7 +66,7 @@ export const useGameStore = create<GameState>()(
     isGameOver: false,
 
    checkWord: (word, username, userColor) => set((state) => {
-    if(formatWord(word) !== formatWord(state.chosenWord)){
+    if(formatWord(word) !== formatWord(state.chosenWord.text)){
       return
     }
 
@@ -73,7 +75,7 @@ export const useGameStore = create<GameState>()(
       return
     }
 
-   customToast(username, state.chosenWord, userColor)
+   customToast(username, state.chosenWord.text, state.chosenWord.description, userColor)
       state.isGameOver = true
       return
    }),
@@ -118,19 +120,18 @@ export const useGameStore = create<GameState>()(
 
         if (key === 'Enter') {
           const word = state.letters[rowIdx].join('').toUpperCase()
-          const targetWord = formatWord(state.chosenWord)
+          const targetWord = formatWord(state.chosenWord.text)
 
           if (word.length !== WORD_LETTERS) {
             customInfoToast("TEM QUE TER 5 LETRAS PORRA")
             return
           }
 
-          if (validWords.findIndex((validWord) => formatWord(validWord) === word) === -1) {
+          if (wordsWithDescriptions.findIndex((wordObject) => formatWord(wordObject.text) === word) === -1) {
             customInfoToast("QUE PALAVRA É ESSA??")
             return
           }
 
-          // Compute Wordle-like feedback respecting letter counts
           const targetCounts: Record<string, number> = {}
           for (let i = 0; i < targetWord.length; i++) {
             const ch = targetWord[i]
@@ -139,7 +140,6 @@ export const useGameStore = create<GameState>()(
 
           const result: (0 | 1 | 2)[] = Array.from({ length: WORD_LETTERS }, () => 0)
 
-          // First pass: mark greens and decrement counts
           for (let i = 0; i < WORD_LETTERS; i++) {
             const g = word[i]
             if (g === targetWord[i]) {
@@ -148,7 +148,6 @@ export const useGameStore = create<GameState>()(
             }
           }
 
-          // Second pass: mark yellows where counts remain
           for (let i = 0; i < WORD_LETTERS; i++) {
             if (result[i] !== 0) continue
             const g = word[i]
@@ -159,7 +158,7 @@ export const useGameStore = create<GameState>()(
           }
 
           if (TRIES - 1 === rowIdx && word !== targetWord) {
-            customLossToast("CADE MEU CABRITO??? \n A PALAVRA ERA: " + state.chosenWord.toUpperCase())
+            customLossToast(state.chosenWord.text.toUpperCase(), state.chosenWord.description)
             state.isGameOver = true
             state.guesses[rowIdx] = result
             return
@@ -170,7 +169,7 @@ export const useGameStore = create<GameState>()(
           state.currentCol = 0
 
           if (word === targetWord) {
-            customWinToast(WIN_MESSAGES[Math.floor(Math.random() * WIN_MESSAGES.length)])
+            customWinToast(WIN_MESSAGES[Math.floor(Math.random() * WIN_MESSAGES.length)], state.chosenWord.text.toUpperCase(), state.chosenWord.description)
             state.isGameOver = true
             return
           }
@@ -185,7 +184,7 @@ export const useGameStore = create<GameState>()(
 
       set((state) => {
         toast.dismiss()
-        state.wordsInThisSession = [...state.wordsInThisSession, state.chosenWord]
+        state.wordsInThisSession = [...state.wordsInThisSession, state.chosenWord.text]
         state.chosenWord = getNewWord(state.wordsInThisSession)
         state.guesses = Array.from({ length: TRIES }, () => Array.from({ length: WORD_LETTERS }, () => 0))
         state.letters = Array.from({ length: TRIES }, () => Array.from({ length: WORD_LETTERS }, () => ''))

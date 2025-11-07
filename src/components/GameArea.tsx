@@ -25,11 +25,11 @@ const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange
 
 
   return (
-    <Card className="w-full flex flex-col gap-4 items-center">
+    <Card className="w-full flex flex-col gap-4 items-center h-fit">
       <CardHeader>
-        <CardTitle className="text-center font-black uppercase text-[48px]">PISCA</CardTitle>
+        <CardTitle className="text-center font-black uppercase text-[40px]">PISCA</CardTitle>
         {/* @ts-ignore Debug: show current target word */}
-       {import.meta.env.DEV && <div className="text-center text-sm text-gray-500 mt-1">Target: {chosenWord.toUpperCase()}</div>}
+       {import.meta.env.DEV && <div className="text-center text-sm text-gray-500 mt-1">Target: {chosenWord.text.toUpperCase()}</div>}
       </CardHeader>
 
       <CardContent>
@@ -56,7 +56,7 @@ const { guesses, letters, currentRow, currentCol, isGameOver, handleLetterChange
                 
                 return (
               <Input
-              className={`md:h-[80px] md:w-[80px] w-[60px] h-[60px] aspect-square md:text-[40px] text-[30px] text-center font-black uppercase border-4`}
+              className={`w-[60px] h-[60px] aspect-square text-[30px] text-center font-black uppercase border-4`}
                 id={`${rowIdx}-${colIdx}`}
                 key={`${rowIdx}-${colIdx}`}
                 value={letter}
