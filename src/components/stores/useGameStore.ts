@@ -1,6 +1,7 @@
 import {  TRIES, WIN_MESSAGES, WORD_LETTERS } from "@/lib/consts"
 import { create } from "zustand"
 import { wordsWithDescriptions } from "../../lib/wordsWithDescriptions"
+import { ALL_VALID_WORDS } from "../../lib/validWords"
 
 type GameState = {
     showMessages: boolean,
@@ -127,7 +128,7 @@ export const useGameStore = create<GameState>()(
             return
           }
 
-          if (wordsWithDescriptions.findIndex((wordObject) => formatWord(wordObject.text) === word) === -1) {
+          if (ALL_VALID_WORDS.findIndex((wordObject) => formatWord(wordObject) === word) === -1) {
             customInfoToast("QUE PALAVRA É ESSA??")
             return
           }

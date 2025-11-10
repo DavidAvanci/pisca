@@ -5,17 +5,17 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Import the valid words
+// Import the valid answers only
 const validWordsPath = path.join(__dirname, '../src/lib/validWords.ts');
 const validWordsContent = fs.readFileSync(validWordsPath, 'utf-8');
-const validWordsMatch = validWordsContent.match(/export const validWords = \[([\s\S]*?)\]/);
+const validWordsMatch = validWordsContent.match(/export const VALID_ANSWERS = \[([\s\S]*?)\];/);
 const validWordsString = validWordsMatch[1];
 const validWords = validWordsString
   .split(',')
   .map(w => w.trim().replace(/['"]/g, ''))
   .filter(w => w.length > 0);
 
-console.log(`Total words to process: ${validWords.length}`);
+console.log(`Total valid answers to process: ${validWords.length}`);
 
 // Configuration
 const API_BASE_URL = 'https://api.dicionario-aberto.net/word';
@@ -75,14 +75,20 @@ async function fetchWordDefinition(word) {
     
     if (!entry.xml) {
       console.log(`  ⚠️  ${word}: No XML in response`);
-      return null;
+      return {
+        text: word,
+        description: 'Não sei'
+      };
     }
     
     const description = parseXmlDefinition(entry.xml);
     
     if (!description) {
       console.log(`  ⚠️  ${word}: Could not extract definition`);
-      return null;
+      return {
+        text: word,
+        description: 'Não sei'
+      };
     }
     
     return {
